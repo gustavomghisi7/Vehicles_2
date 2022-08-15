@@ -1,7 +1,6 @@
 package com.vehicles.controllers;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.vehicles.entity.Vehicles;
 import com.vehicles.repository.VehiclesRepository;
+import com.vehicles.services.VehicleService;
 
 @RestController
 @RequestMapping("/")
@@ -25,6 +25,9 @@ public class VehiclesController {
 	@Autowired
 	VehiclesRepository repo;
 	
+	@Autowired
+	VehicleService service;
+	
 	@GetMapping
 	public String home() {
 		return "Welcome to home page";
@@ -32,16 +35,13 @@ public class VehiclesController {
 	
 	@GetMapping("/vehicle")
 	public ResponseEntity<List<Vehicles>> getVehicle() {
-		List<Vehicles> vehicles = (List<Vehicles>) repo.findAll();
+		List<Vehicles> vehicles = service.consultVehicles();
 		return ResponseEntity.status(HttpStatus.OK).body(vehicles);
 	}
 	
 	@GetMapping("/vehicle/{idvehicle}")
 	public ResponseEntity<Vehicles> getVehicleById(@PathVariable("idvehicle") Long idvehicle) {
-		Optional<Vehicles> vehicle = repo.findById(idvehicle);
-		return vehicle.isPresent() ?
-				ResponseEntity.ok(vehicle.get()) :
-				ResponseEntity.notFound().build();
+		return ResponseEntity.ok(service.consultVehicleById(idvehicle));
 	}
 	
 	@PostMapping("/vehicle")
@@ -52,7 +52,7 @@ public class VehiclesController {
 	
 	@DeleteMapping("/vehicle/{idvehicle}")
 	public ResponseEntity<Void> deleteVehicle(@PathVariable("idvehicle") Long idvehicle) {
-		repo.deleteById(idvehicle);
+		service.excludeVehicle(idvehicle);
 		return ResponseEntity.noContent().build();
 		
 	}
@@ -60,7 +60,7 @@ public class VehiclesController {
 	@PutMapping("/vehicle/{idvehicle}")
 	public ResponseEntity<Vehicles> updateContact(@PathVariable("idvehicle")
 		Long idvehicle, @RequestBody Vehicles vehicle) {
-		return ResponseEntity.ok(repo.save(vehicle));
+		return ResponseEntity.ok(service.chageVehicle(idvehicle, vehicle));
 	}
 	
 	
